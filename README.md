@@ -1,6 +1,6 @@
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-##SVG Pathifier
+## SVG Pathifier
 Web tool for creating SVG with path and modifying the appearance. 
 
 ### Available Scripts
