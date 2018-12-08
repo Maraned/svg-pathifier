@@ -10,11 +10,11 @@ class App extends Component {
     super(props);
 
     this.state = {
-      svgPaths: [],
+      svgPaths: {},
       viewBox: "0 0 200 200",
-      stroke: '#222',
-      strokeWidth: '2',
-      fill: "#fff",
+      stroke: '#222222',
+      strokeWidth: 2,
+      fill: "#ffffff",
     };
   }
 
@@ -31,7 +31,7 @@ class App extends Component {
   }
 
   updateStrokeWidth = event => {
-    this.setState({ strokeWidth: event.target.value });
+    this.setState({ strokeWidth: parseInt(event.target.value, 10) });
   }
 
   updateFill = event => {

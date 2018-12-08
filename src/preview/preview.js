@@ -5,10 +5,99 @@ import React, { Component } from 'react';
 export default class Preview extends Component {
     constructor(props) {
         super(props);
+
+        this.paths = this.constructSvgPath(props.svgPaths)
+        this.hoverPaths = this.createHoverPaths(Object.values(this.paths));
+
+        this.tooltip = React.createRef();
+        this.tooltipText = 'Hover over path to see info';
     }
 
-    constructSvgPath(paths) {
-        return paths.join(' ');
+    componentWillUpdate(props) {
+        this.paths = this.constructSvgPath(props.svgPaths)
+        this.hoverPaths = this.createHoverPaths(Object.values(this.paths));
+    }
+
+    constructSvgPath(svgPaths) {
+        let paths = {};
+        for (let index in svgPaths) {
+            const { unit, path } = svgPaths[index];
+            const isValidPath = this.isValidPath(path);
+            if (isValidPath) {
+                if (unit === 'path') {
+                    if (paths[unit]) {
+                        paths['path'] += ` ${path}`;
+                    }
+                    else {
+                        paths['path'] = path;
+                    }
+                }
+                else {
+                    paths[`${unit}-${index}`] = path;
+                }
+            }
+        }
+        return paths;
+    }
+
+    unitPropertyLengths = {
+        z: 0,
+        h: 1,
+        v: 1,
+        m: 2,
+        l: 2,
+        t: 2,
+        s: 4,
+        q: 4,
+        a: 7,
+        c: 6,
+    }
+
+    isValidPath = path => {
+        const unitMatch = path.match(/([mlhvcsqtazMLHVCSQTAZ])/);
+        if (unitMatch) {
+            const unit = unitMatch[0].toLowerCase();
+            const unitPropertyLength = this.unitPropertyLengths[unit];
+            const propertyLengthMatch = path.match(/(\d+\.?\d*)/g);
+            const propertyLength = propertyLengthMatch ? propertyLengthMatch.length : 0;
+            return unitPropertyLength === propertyLength;
+        }
+        return false;
+    }
+
+    createHoverPaths = svgPaths => {
+        const hoverPaths = [];
+        let previousPath = { x: 0, y: 0 };
+        for (let i = 0; i < svgPaths.length; i++) {
+            const svgPath = svgPaths[i];
+            const paths = svgPath.split(/(?=[a-zA-Z])/);
+            for (let j = 0; j < paths.length; j++) {
+                const path = paths[j];
+                const { x, y } = this.getXAndYPosition(path);
+                if (j !== 0) { // start point m at index 0
+                    const createdPath = this.createPathElem(path, previousPath);
+                    hoverPaths.push(createdPath);
+                }
+                previousPath.x += parseInt(x, 10);
+                previousPath.y += parseInt(y, 10);
+            }
+        }
+        return hoverPaths;
+    }
+
+    createPathElem = (path, previousPath) => {
+        const startPoint = previousPath ? `m ${previousPath.x} ${previousPath.y}` : '';
+        return `${startPoint} ${path}`;
+    }
+
+    getXAndYPosition = path => {
+        const pathRegex = /\w\s+(\d+)\s+(\d+)/;
+        const match = path.match(pathRegex)
+        if (match) {
+            const [full, x, y] = match;
+            return { x, y };
+        }
+        return { x: 0, y: 0 }
     }
 
     getViewBoxDimensions(viewBox) {
@@ -19,9 +108,33 @@ export default class Preview extends Component {
         }
     }
 
+    hoverPath = hovered => event => {
+        const elem = event.target;
+        let text = '';
+        if (hovered) {
+            elem.classList.add('hovered');
+            text = this.parsePathText(elem.getAttribute('d'));
+        }
+        else {
+            elem.classList.remove('hovered');
+        }
+        
+        this.updateTooltipPos(text);
+    }
+
+    parsePathText = path => {
+        const pathParts = path.split(/(?=[a-zA-Z])/);
+        return pathParts.join('<br/>');
+    }
+
+    updateTooltipPos = (text) => {
+        const tooltip = this.tooltip.current;
+        tooltip.innerHTML = text || this.tooltipText;
+    }
+
     render() {
-        const { 
-            viewBox, 
+        const {
+            viewBox,
             svgPaths,
             stroke,
             strokeWidth,
@@ -29,17 +142,45 @@ export default class Preview extends Component {
         } = this.props;
         const { width, height } = this.getViewBoxDimensions(viewBox);
 
+        const paths = this.paths;
+
         return (
-            <svg 
-                width={width} 
-                height={height} 
-                viewBox={viewBox} 
-                stroke={stroke} 
-                strokeWidth={strokeWidth}
-                fill={fill}
-            >
-                <path d={this.constructSvgPath(svgPaths)} />
-            </svg>
+            <div className="preview" style={{ "width": `${width}px`, "height": `${height}px` }}>
+                <svg
+                    width={width}
+                    height={height}
+                    viewBox={viewBox}
+                    stroke={stroke}
+                    strokeWidth={strokeWidth}
+                    fill={fill}
+                >
+                    {Object.keys(paths).map(unitWithSuffix => {
+                        const [unit, suffix] = unitWithSuffix.split('-');
+                        const path = paths[unitWithSuffix]
+                        const UnitTag = unit === 'path' ? 'path' : unit;
+                        return unit === 'path' ? (
+                                <UnitTag key={unitWithSuffix} d={path} />
+                            ) : (
+                                <UnitTag key={unitWithSuffix} {...path} />
+                            )
+                    })}
+                    {this.hoverPaths.map((path, index) => {
+                        return (
+                            <path 
+                                key={index}
+                                d={path} 
+                                stroke="transparent" 
+                                onMouseOver={this.hoverPath(true)}
+                                onMouseLeave={this.hoverPath(false)}
+                                strokeWidth={strokeWidth + 8}
+                            />
+                        )
+                    })}
+                </svg>
+                <div className="tooltip" ref={this.tooltip} data-origin-text={this.tooltipText}>
+                    {this.tooltipText}
+                </div>
+            </div>
         );
     }
 }
