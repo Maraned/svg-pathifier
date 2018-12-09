@@ -132,10 +132,43 @@ export default class Preview extends Component {
         tooltip.innerHTML = text || this.tooltipText;
     }
 
+    createCornerElements = (width, height) => {
+        return (
+            <>
+                {this.cornerPosition('top', 'left', 0, 0)}
+                {this.cornerPosition('top', 'right', width, 0)}
+                {this.cornerPosition('bottom', 'left', 0, height)}
+                {this.cornerPosition('bottom', 'right', width, height)}
+            </>
+        )
+    }
+
+    cornerPosition = (vertical, horizontal, x, y) => {
+        return (
+            <div className={`${vertical}-${horizontal}-pos corner-pos`}>
+                <span className="horizontal-pos">{x}</span>
+                <span className="vertical-pos">{y}</span>
+            </div>
+        )
+    }
+
+    getSvgViewBox = viewBox => {
+        const viewBoxPropertyLength = viewBox.match(/(\d+\.?\d*)/g);
+        if (viewBoxPropertyLength.length === 4) {
+            return viewBox;
+        }
+        else {
+            const diff = 4 - viewBoxPropertyLength.length;
+            for (let i = 0; i < diff; i++) {
+                viewBox += ' 0';
+            }
+            return viewBox;
+        }
+    }
+
     render() {
         const {
             viewBox,
-            svgPaths,
             stroke,
             strokeWidth,
             fill,
@@ -143,40 +176,45 @@ export default class Preview extends Component {
         const { width, height } = this.getViewBoxDimensions(viewBox);
 
         const paths = this.paths;
+        const svgViewBox = this.getSvgViewBox(viewBox);
 
         return (
-            <div className="preview" style={{ "width": `${width}px`, "height": `${height}px` }}>
-                <svg
-                    width={width}
-                    height={height}
-                    viewBox={viewBox}
-                    stroke={stroke}
-                    strokeWidth={strokeWidth}
-                    fill={fill}
-                >
-                    {Object.keys(paths).map(unitWithSuffix => {
-                        const [unit, suffix] = unitWithSuffix.split('-');
-                        const path = paths[unitWithSuffix]
-                        const UnitTag = unit === 'path' ? 'path' : unit;
-                        return unit === 'path' ? (
-                                <UnitTag key={unitWithSuffix} d={path} />
-                            ) : (
-                                <UnitTag key={unitWithSuffix} {...path} />
+            <div className="preview">
+                <div class="svg-container" style={{ "width": `${width || 0}px`, "height": `${height || 0}px` }}> 
+                    {this.createCornerElements(width, height)} 
+                    <svg
+                        width={width || 0}
+                        height={height || 0}
+                        viewBox={svgViewBox}
+                        stroke={stroke}
+                        strokeWidth={strokeWidth}
+                        fill={fill}
+                    >
+                        {Object.keys(paths).map(unitWithSuffix => {
+                            const [unit, suffix] = unitWithSuffix.split('-');
+                            const path = paths[unitWithSuffix]
+                            const UnitTag = unit === 'path' ? 'path' : unit;
+                            return unit === 'path' ? (
+                                    <UnitTag key={unitWithSuffix} d={path} />
+                                ) : (
+                                    <UnitTag key={unitWithSuffix} {...path} />
+                                )
+                        })}
+                        {this.hoverPaths.map((path, index) => {
+                            return (
+                                <path 
+                                    key={index}
+                                    d={path} 
+                                    stroke="transparent" 
+                                    onMouseOver={this.hoverPath(true)}
+                                    onMouseLeave={this.hoverPath(false)}
+                                    strokeWidth={strokeWidth + 8}
+                                />
                             )
-                    })}
-                    {this.hoverPaths.map((path, index) => {
-                        return (
-                            <path 
-                                key={index}
-                                d={path} 
-                                stroke="transparent" 
-                                onMouseOver={this.hoverPath(true)}
-                                onMouseLeave={this.hoverPath(false)}
-                                strokeWidth={strokeWidth + 8}
-                            />
-                        )
-                    })}
-                </svg>
+                        })}
+                    </svg>
+                </div>
+
                 <div className="tooltip" ref={this.tooltip} data-origin-text={this.tooltipText}>
                     {this.tooltipText}
                 </div>
