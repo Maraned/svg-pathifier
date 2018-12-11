@@ -1,10 +1,13 @@
 import './preview.css';
 
 import React, { Component } from 'react';
+import PreviewPath from './previewPath';
+import CornerElements from './cornerElements';
 
 export default class Preview extends Component {
     constructor(props) {
         super(props);
+
 
         this.paths = this.constructSvgPath(props.svgPaths)
         this.hoverPaths = this.createHoverPaths(Object.values(this.paths));
@@ -108,50 +111,6 @@ export default class Preview extends Component {
         }
     }
 
-    hoverPath = hovered => event => {
-        const elem = event.target;
-        let text = '';
-        if (hovered) {
-            elem.classList.add('hovered');
-            text = this.parsePathText(elem.getAttribute('d'));
-        }
-        else {
-            elem.classList.remove('hovered');
-        }
-        
-        this.updateTooltipPos(text);
-    }
-
-    parsePathText = path => {
-        const pathParts = path.split(/(?=[a-zA-Z])/);
-        return pathParts.join('<br/>');
-    }
-
-    updateTooltipPos = (text) => {
-        const tooltip = this.tooltip.current;
-        tooltip.innerHTML = text || this.tooltipText;
-    }
-
-    createCornerElements = (width, height) => {
-        return (
-            <>
-                {this.cornerPosition('top', 'left', 0, 0)}
-                {this.cornerPosition('top', 'right', width, 0)}
-                {this.cornerPosition('bottom', 'left', 0, height)}
-                {this.cornerPosition('bottom', 'right', width, height)}
-            </>
-        )
-    }
-
-    cornerPosition = (vertical, horizontal, x, y) => {
-        return (
-            <div className={`${vertical}-${horizontal}-pos corner-pos`}>
-                <span className="horizontal-pos">{x}</span>
-                <span className="vertical-pos">{y}</span>
-            </div>
-        )
-    }
-
     getSvgViewBox = viewBox => {
         const viewBoxPropertyLength = viewBox.match(/(\d+\.?\d*)/g);
         if (viewBoxPropertyLength.length === 4) {
@@ -181,7 +140,8 @@ export default class Preview extends Component {
         return (
             <div className="preview">
                 <div class="svg-container" style={{ "width": `${width || 0}px`, "height": `${height || 0}px` }}> 
-                    {this.createCornerElements(width, height)} 
+                    <CornerElements width={width} height={height} />
+
                     <svg
                         width={width || 0}
                         height={height || 0}
@@ -200,18 +160,16 @@ export default class Preview extends Component {
                                     <UnitTag key={unitWithSuffix} {...path} />
                                 )
                         })}
-                        {this.hoverPaths.map((path, index) => {
-                            return (
-                                <path 
-                                    key={index}
-                                    d={path} 
-                                    stroke="transparent" 
-                                    onMouseOver={this.hoverPath(true)}
-                                    onMouseLeave={this.hoverPath(false)}
-                                    strokeWidth={strokeWidth + 8}
-                                />
-                            )
-                        })}
+                        {this.hoverPaths.map((path, index) => (
+                            <PreviewPath 
+                                key={`pp-${index}`} 
+                                path={path} 
+                                index={index}  
+                                strokeWidth={strokeWidth}
+                                tooltip={this.tooltip}
+                                tooltipText={this.tooltipText}
+                            />
+                        ))}
                     </svg>
                 </div>
 
