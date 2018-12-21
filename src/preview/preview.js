@@ -23,7 +23,8 @@ export default class Preview extends Component {
 
     constructSvgPath(svgPaths) {
         let paths = {};
-        for (let index in svgPaths) {
+        // for (let index in svgPaths) {
+        for (let index = 0; index < svgPaths.length; index++) {
             const { unit, path } = svgPaths[index];
             const isValidPath = this.isValidPath(path);
             if (isValidPath) {
@@ -139,7 +140,7 @@ export default class Preview extends Component {
 
         return (
             <div className="preview">
-                <div class="svg-container" style={{ "width": `${width || 0}px`, "height": `${height || 0}px` }}> 
+                <div className="svg-container" style={{ "width": `${width || 0}px`, "height": `${height || 0}px` }}> 
                     <CornerElements width={width} height={height} />
 
                     <svg

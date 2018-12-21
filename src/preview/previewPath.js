@@ -22,12 +22,11 @@ export default class PreviewPath extends Component {
 
     updateTooltipPos = (text) => {
         const tooltip = this.props.tooltip.current;
-        tooltip.innerHTML = text || this.tooltipText;
+        tooltip.innerHTML = text || this.props.tooltipText;
     }
 
     render() {
         const {
-            index,
             path,
             strokeWidth
         } = this.props;

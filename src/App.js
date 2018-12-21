@@ -10,7 +10,7 @@ class App extends Component {
     super(props);
 
     this.state = {
-      svgPaths: {},
+      svgPaths: [],
       viewBox: "0 0 200 200",
       stroke: '#222222',
       strokeWidth: 2,
