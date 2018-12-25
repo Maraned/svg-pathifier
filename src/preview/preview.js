@@ -3,6 +3,7 @@ import './preview.css';
 import React, { Component } from 'react';
 import PreviewPath from './previewPath';
 import CornerElements from './cornerElements';
+import Tooltip from './tooltip';
 
 export default class Preview extends Component {
     constructor(props) {
@@ -143,6 +144,8 @@ export default class Preview extends Component {
                 <div className="svg-container" style={{ "width": `${width || 0}px`, "height": `${height || 0}px` }}> 
                     <CornerElements width={width} height={height} />
 
+                    <Tooltip ref={input => this.tooltip = input} />
+
                     <svg
                         width={width || 0}
                         height={height || 0}
@@ -168,15 +171,18 @@ export default class Preview extends Component {
                                 index={index}  
                                 strokeWidth={strokeWidth}
                                 tooltip={this.tooltip}
-                                tooltipText={this.tooltipText}
                             />
                         ))}
                     </svg>
                 </div>
 
-                <div className="tooltip" ref={this.tooltip} data-origin-text={this.tooltipText}>
+
+                {/* { tooltipVisible && ( */}
+                {/* )} */}
+
+                {/* <div className="tooltip" ref={this.tooltip} data-origin-text={this.tooltipText}>
                     {this.tooltipText}
-                </div>
+                </div> */}
             </div>
         );
     }

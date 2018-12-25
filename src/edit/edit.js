@@ -60,8 +60,8 @@ export default class Edit extends Component {
 	setSelectedUnit = selectedUnit => this.setState({ selectedUnit })
 
 	componentDidUpdate() {
-		if (this.focusLastPath && this.lastInput.current) {
-			// this.lastInput.current.focus(); 
+		if (this.focusLastPath && this.lastInput) {
+			this.lastInput.focusInput();
 			this.focusLastPath = false;
 		}
 	}
@@ -132,17 +132,15 @@ export default class Edit extends Component {
 				<div className="edit-paths">
 					<label>Paths</label>
 					<div className="edit-paths-list">
-						{/* {svgPathKeys.map(index => { */}
 						{svgPaths.map((svgPath, index) => {
 							const { path } = svgPath;
 
-							return <>
+							return <React.Fragment key={`edit-path-${index}`}>
 								<EditPath
-									key={`edit-path-${index}`}
 									path={path}
 									index={index}
 									updateSvgPath={this.updateSvgPath(index)}
-									ref={index === svgPaths.length - 1 ? this.lastInput : null}
+									ref={input => this.lastInput = input}
 									setSelectedUnit={this.setSelectedUnit}
 								/>
 								{index < svgPaths.length - 1 && (
@@ -152,7 +150,7 @@ export default class Edit extends Component {
 										<DeleteIcon onClick={this.deleteSvgPath(index)} />
 									</div>
 								)}
-							</>
+							</React.Fragment>
 						})}
 					</div>
 

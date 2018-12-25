@@ -1,0 +1,15 @@
+.tooltip {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  left: 0;
+  transform: translateY(150%);
+  padding: 20px;
+  border: 1px solid #222;
+  height: 40px;
+}
+
+
+.tooltip-point {
+  position: absolute;
+}
