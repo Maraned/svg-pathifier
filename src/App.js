@@ -67,6 +67,7 @@ class App extends Component {
           stroke={stroke}
           strokeWidth={strokeWidth}
           fill={fill}
+          updatePaths={this.updatePaths}
         />
       </div>
     );

@@ -127,6 +127,26 @@ export default class Preview extends Component {
         }
     }
 
+    getSvgViewBoxPosition = (width, height) => {
+        if (!this.svgViewBoxElement) {
+            return;
+        }
+
+        const { x, y } = this.svgViewBoxElement.getBoundingClientRect();
+
+        return { x, y, maxX: width, maxY: height };
+    }
+
+    pathUpdated = (index, path) => {
+        const { svgPaths, updatePaths } = this.props;
+        const modifiedPath = svgPaths[index];
+
+        modifiedPath.path = path; 
+        svgPaths[index] = modifiedPath;
+
+        updatePaths(svgPaths);
+    }
+
     render() {
         const {
             viewBox,
@@ -138,6 +158,7 @@ export default class Preview extends Component {
 
         const paths = this.paths;
         const svgViewBox = this.getSvgViewBox(viewBox);
+        const svgViewBoxPosition = this.getSvgViewBoxPosition(width, height);
 
         return (
             <div className="preview">
@@ -153,6 +174,7 @@ export default class Preview extends Component {
                         stroke={stroke}
                         strokeWidth={strokeWidth}
                         fill={fill}
+                        ref={svg => this.svgViewBoxElement = svg}
                     >
                         {Object.keys(paths).map(unitWithSuffix => {
                             const [unit, suffix] = unitWithSuffix.split('-');
@@ -171,6 +193,8 @@ export default class Preview extends Component {
                                 index={index}  
                                 strokeWidth={strokeWidth}
                                 tooltip={this.tooltip}
+                                svgViewBoxPosition={svgViewBoxPosition}
+                                pathUpdated={this.pathUpdated}
                             />
                         ))}
                     </svg>

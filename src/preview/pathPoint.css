@@ -1,0 +1,4 @@
+.pathPoint {
+  pointer-events: all;
+  z-index: 99999;
+}

@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PathPoint from './pathPoint';
 
 export default class PreviewPath extends Component {
     constructor(props) {
@@ -57,7 +58,6 @@ export default class PreviewPath extends Component {
         }
 
         this.setState({ points });
-
         return texts; 
     }
 
@@ -80,23 +80,46 @@ export default class PreviewPath extends Component {
         }
     }
 
+    pointsUpdated = (index, newPoints) => {
+        const { points } = this.state;
+        points[index] = newPoints;
+        this.setState({ points });
+
+        const { path } = this.props;
+        const pathParts = path.split(/(?=[a-zA-Z])/s);
+        const movedPart = pathParts[index];
+        const unitRegex = /([a-zA-Z])\s/;
+        const [noOpt, unit] = movedPart.match(unitRegex);
+        const newPath = `${unit} ${newPoints.x} ${newPoints.y}`;
+
+        this.props.pathUpdated(this.props.index + 1, newPath);        
+
+        pathParts[index] = newPath;
+
+        this.parsePathText(pathParts.join(' '))
+
+    }
+
     render() {
         const {
             path,
             strokeWidth,
+            svgViewBoxPosition,
         } = this.props;
 
-        const { points, visible } = this.state;
+        const { points } = this.state;
 
         return (
             <>
-                {visible && points.map((point, index) => (
-                    <circle 
+                {/* {visible && points.map((point, index) => ( */}
+                {points.map((point, index) => (
+                    <PathPoint 
                         key={`point-${index}`} 
-                        cx={point.x} 
-                        cy={point.y} 
-                        r={5} 
-                        fill={this.colors[index]} 
+                        color={this.colors[index]}
+                        point={point}
+                        index={index}
+                        pointsUpdated={this.pointsUpdated}
+                        svgViewBoxPosition={svgViewBoxPosition}
                     />
                 ))}
                 <path 

@@ -101,10 +101,7 @@ export default class Edit extends Component {
 			updateFill,
 		} = this.props;
 
-		const {
-			showUnits,
-			previousActions
-		} = this.state;
+		const { previousActions } = this.state;
 
 		return (
 			<div className="edit">
